@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: todo-app
-        image: todo-app:latest
-        imagePullPolicy: IfNotPresent
+        image: gcr.io/todo-app-proje/todo-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
