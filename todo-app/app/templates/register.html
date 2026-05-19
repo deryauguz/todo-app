@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol - To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <a href="{{ url_for('landing') }}" class="back-link">← Geri</a>
+        </div>
+        <h1>Kayıt Ol</h1>
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Kullanıcı Adı" required>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" placeholder="E-posta" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Şifre" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="confirm_password" placeholder="Şifre Tekrar" required>
+            </div>
+            <button type="submit" class="btn">Kayıt Ol</button>
+        </form>
+    </div>
+</body>
+</html>

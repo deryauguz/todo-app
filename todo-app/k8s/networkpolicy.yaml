@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: todo-app-network-policy
+  namespace: todo-app
+spec:
+  podSelector:
+    matchLabels:
+      app: todo-app
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector: {}
+    ports:
+    - port: 8080

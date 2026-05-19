@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <span>👋 Hoşgeldiniz, <strong>{{ username or session.user_email }}</strong></span>
+            <div>
+                <a href="{{ url_for('profile') }}" class="nav-link">Profil</a>
+                <a href="{{ url_for('logout') }}" class="nav-link">Çıkış</a>
+            </div>
+        </div>
+
+        <h1>Yapılacaklar</h1>
+        
+        <!-- Yeni Görev Ekleme Formu -->
+        <div class="calculator-box">
+            <div class="form-group">
+                <input type="text" id="todoTitle" placeholder="Görev başlığı" required>
+            </div>
+            <div class="form-group">
+                <textarea id="todoDesc" rows="2" placeholder="Açıklama (isteğe bağlı)"></textarea>
+            </div>
+            <button onclick="addTodo()" class="btn">+ Görev Ekle</button>
+        </div>
+
+        <!-- Filtre Butonları -->
+        <div class="filter-buttons">
+            <button class="filter-btn {% if filter == 'all' %}active{% endif %}" onclick="filterTodos('all')">Tümü</button>
+            <button class="filter-btn {% if filter == 'active' %}active{% endif %}" onclick="filterTodos('active')">Aktif</button>
+            <button class="filter-btn {% if filter == 'completed' %}active{% endif %}" onclick="filterTodos('completed')">Tamamlanan</button>
+        </div>
+
+        <!-- Görev Listesi -->
+        <h2>Görevlerim</h2>
+        <ul class="todo-list" id="todoList">
+            {% for todo in todos %}
+            <li class="todo-item {% if todo.completed %}completed{% endif %}" id="todo-{{ todo.id }}">
+                <div class="todo-content">
+                    <input type="checkbox" class="checkbox" {% if todo.completed %}checked{% endif %} onchange="toggleTodo({{ todo.id }})">
+                    <div style="flex:1">
+                        <div class="todo-title">{{ todo.title }}</div>
+                        {% if todo.description %}
+                        <div class="todo-description">{{ todo.description }}</div>
+                        {% endif %}
+                        <div class="todo-date">{{ todo.created_at[:16] }}</div>
+                    </div>
+                </div>
+                <div class="todo-actions">
+                    <button onclick="editTodo({{ todo.id }}, '{{ todo.title }}', '{{ todo.description or '' }}')" class="btn btn-sm btn-secondary">Düzenle</button>
+                    <button onclick="deleteTodo({{ todo.id }})" class="btn btn-sm btn-danger">Sil</button>
+                </div>
+            </li>
+            {% else %}
+            <li class="empty-message">Henüz görev eklenmemiş. Yukarıdan ekleyebilirsin!</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Düzenleme Modal'ı -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Görevi Düzenle</h2>
+            <input type="hidden" id="editTodoId">
+            <div class="form-group">
+                <input type="text" id="editTitle" placeholder="Başlık">
+            </div>
+            <div class="form-group">
+                <textarea id="editDesc" rows="3" placeholder="Açıklama"></textarea>
+            </div>
+            <button onclick="saveEdit()" class="btn">Kaydet</button>
+        </div>
+    </div>
+
+    <script>
+        function addTodo() {
+            const title = document.getElementById('todoTitle').value;
+            const description = document.getElementById('todoDesc').value;
+            
+            if (!title) {
+                alert('Lütfen bir başlık girin');
+                return;
+            }
+            
+            fetch('/add-todo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'title': title,
+                    'description': description
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        }
+        
+        function toggleTodo(id) {
+            fetch(`/toggle-todo/${id}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                });
+        }
+        
+        function deleteTodo(id) {
+            if (confirm('Bu görevi silmek istediğinize emin misiniz?')) {
+                fetch(`/delete-todo/${id}`, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) location.reload();
+                    });
+            }
+        }
+        
+        function editTodo(id, title, description) {
+            document.getElementById('editTodoId').value = id;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editDesc').value = description;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        function saveEdit() {
+            const id = document.getElementById('editTodoId').value;
+            const title = document.getElementById('editTitle').value;
+            const description = document.getElementById('editDesc').value;
+            
+            fetch(`/edit-todo/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'title': title,
+                    'description': description
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeModal();
+                    location.reload();
+                }
+            });
+        }
+        
+        function filterTodos(filter) {
+            window.location.href = `/dashboard?filter=${filter}`;
+        }
+        
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

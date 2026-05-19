@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <a href="{{ url_for('dashboard') }}" class="back-link">← Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="nav-link">Çıkış</a>
+        </div>
+
+        <h1>Profil</h1>
+        
+        <div class="profile-section">
+            <h3>Kullanıcı Bilgileri</h3>
+            <p><strong>Kullanıcı Adı:</strong> {{ user.username }}</p>
+            <p><strong>E-posta:</strong> {{ user.email }}</p>
+            <p><strong>Kayıt Tarihi:</strong> {{ user.created_at[:10] }}</p>
+            <p><strong>Tamamlanan Görev:</strong> {{ completed_count }}</p>
+        </div>
+
+        <div class="profile-section">
+            <h3>E-posta Güncelle</h3>
+            <form method="POST" action="{{ url_for('profile') }}">
+                <input type="hidden" name="action" value="update_email">
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Yeni E-posta" value="{{ user.email }}" required>
+                </div>
+                <button type="submit" class="btn">Güncelle</button>
+            </form>
+        </div>
+
+        <div class="profile-section">
+            <h3>Şifre Değiştir</h3>
+            <form method="POST" action="{{ url_for('profile') }}">
+                <input type="hidden" name="action" value="change_password">
+                <div class="form-group">
+                    <input type="password" name="current_password" placeholder="Mevcut Şifre" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="new_password" placeholder="Yeni Şifre" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="confirm_password" placeholder="Yeni Şifre Tekrar" required>
+                </div>
+                <button type="submit" class="btn">Şifre Değiştir</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
